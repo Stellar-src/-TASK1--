@@ -1,0 +1,8 @@
+Python 3.9.25
+numpy: 1.21.6
+pandas: 1.4.4
+matplotlib: 3.5.3
+scikit-learn: 1.1.3
+torch: 2.8.0+cpu
+
+(若锁定Python3.9版本，不能升级其他库的版本（必须强行锁定），否则会引来版本冲突)
