@@ -35,9 +35,18 @@ X_test=torch.tensor(X_test.values,dtype=torch.float32)
 y_train=torch.tensor(y_train.values,dtype=torch.float32)
 y_test=torch.tensor(y_test.values,dtype=torch.float32)
 print(X_train.shape)
-#开始构建模型
+#开始构建模型----------------------------------------------------------------这里添加了隐藏层，让模型拥有非线性表达的能力
 torch.manual_seed(42)
-net = nn.Sequential(nn.Linear(7,1),nn.Sigmoid())
+net = nn.Sequential(
+    nn.Linear(7,16),
+    nn.ReLU(),
+
+    nn.Linear(16,8),
+    nn.ReLU(),
+
+    nn.Linear(8,1),
+    nn.Sigmoid()
+)
 #定义损失函数
 loss_fn = nn.BCELoss()
 #print(loss)
@@ -60,6 +69,7 @@ for epoch in range(100):
     if epoch % 1 == 0:
         loss_history.append(loss.item())
         epoch_history.append(epoch)
+        net.eval()   #切换到测试模式
         with torch.no_grad():
             test_pred = net(X_test)
             train_pred = net(X_train)
@@ -67,6 +77,7 @@ for epoch in range(100):
         accuracy_test = ((test_pred>0.5).float()==y_test.reshape(-1,1)).float().mean().item()
         train_history.append(accuracy_train)
         test_history.append(accuracy_test)
+        net.train()  #恢复训练模式
 
 print(net[0].weight)
 print(net[0].bias)
@@ -107,5 +118,7 @@ pclass, female, male, age, sibsp, parch, fare = [item.strip() for item in raw]
 example = pd.DataFrame([{"Pclass": int(pclass),"Sex_female": int(female), "Sex_male": int(male), "Age": float(age),"SibSp": int(sibsp),"Parch": int(parch),"Fare": float(fare),}])
 example = (example - mean) / std
 example=torch.tensor(example.to_numpy(),dtype=torch.float32)
-output = net(example)
+net.eval()
+with torch.no_grad():
+    output = net(example)
 print(f"该乘客预测状态为{['死亡', '幸存'][int(output.item() > 0.5)]}")
